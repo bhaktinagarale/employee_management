@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>manage_employees</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/man_emp.css">
+</head>
+
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="our_employees.html">Our Employees</a>
+      <a href="#">Manage Employees</a>
+    </nav>
+  </header>
+
+
+  <main>
+    <h2 style="text-align: center; ">Employee Management</h2>
+    <br>
+    <!-- Table to Display Employees -->
+    <table id="employeeTable">
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Joining Date</th>
+          <th>Salary</th>
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be populated here -->
+      </tbody>
+    </table>
+
+    <br><br><br><br>
+
+
+
+    <!-- Button to Add New Employee -->
+    <button id="addEmployeeBtn">Add New Employee</button>
+
+    <!-- Form to Add/Edit Employee -->
+    <div class="form-container" id="form-container">
+      <h3 id="form-title">Add Employee</h3>
+      <form id="employeeForm">
+        <label for="empId">Employee ID:</label>
+        <input type="text" id="empId" required><br>
+
+        <label for="empName">Name:</label>
+        <input type="text" id="empName" required><br>
+
+        <label for="department">Department:</label>
+        <select id="department" tye="text" required>
+          <option value="">-- Select Department --</option>
+          <option value="HR">HR</option>
+          <option value="Engineering">Engineering</option>
+          <option value="Sales">Sales</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Finance">Finance</option>
+        </select><br>
+
+
+        <label for="joiningDate">Joining Date:</label>
+        <input type="date" id="joiningDate" required><br>
+
+        <label for="salary">Salary:</label>
+        <input type="number" id="salary" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required><br>
+
+        <button type="submit">Save</button>
+      </form>
+    </div>
+
+    <script>
+      let employees = []; // Holds employee data
+
+      document.getElementById('addEmployeeBtn').addEventListener('click', () => {
+        document.getElementById('form-container').style.display = 'block';
+        document.getElementById('form-title').innerText = 'Add Employee';
+        document.getElementById('employeeForm').reset();
+      });
+
+      // Function to load employee data
+      function loadEmployees() {
+        // Fetch from the backend API (to be implemented later)
+        fetch('/api/employees')
+          .then(response => response.json())
+          .then(data => {
+            employees = data;
+            displayEmployees();
+          });
+      }
+
+      // Function to display employees in the table
+      function displayEmployees() {
+        const tableBody = document.querySelector('#employeeTable tbody');
+        tableBody.innerHTML = ''; // Clear previous data
+
+        const departmentFilter = document.getElementById('departmentFilter').value;
+
+        employees
+          .filter(emp => !departmentFilter || emp.department === departmentFilter)
+          .forEach(emp => {
+            const row = `<tr>
+                      <td>${emp.id}</td>
+                      <td>${emp.name}</td>
+                      <td>${emp.department}</td>
+                      <td>${emp.joiningDate}</td>
+                      <td>${emp.salary}</td>
+                      <td>${emp.email}</td>
+                      <td>
+                          <button onclick="editEmployee(${emp.id})">Edit</button>
+                          <button onclick="deleteEmployee(${emp.id})">Delete</button>
+                      </td>
+                  </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row);
+          });
+      }
+
+      // Function to delete an employee
+      function deleteEmployee(id) {
+        fetch(`/api/employees/${id}`, { method: 'DELETE' })
+          .then(() => {
+            employees = employees.filter(emp => emp.id !== id);
+            displayEmployees();
+          });
+      }
+
+      // Function to edit an employee
+      function editEmployee(id) {
+        const employee = employees.find(emp => emp.id === id);
+        document.getElementById('form-container').style.display = 'block';
+        document.getElementById('form-title').innerText = 'Edit Employee';
+        document.getElementById('empId').value = employee.id;
+        document.getElementById('empName').value = employee.name;
+        document.getElementById('department').value = employee.department;
+        document.getElementById('joiningDate').value = employee.joiningDate;
+        document.getElementById('salary').value = employee.salary;
+        document.getElementById('email').value = employee.email;
+      }
+
+      // Save employee (add or edit)
+      document.getElementById('employeeForm').addEventListener('submit', event => {
+        event.preventDefault();
+
+        const id = document.getElementById('empId').value;
+        const name = document.getElementById('empName').value;
+        const department = document.getElementById('department').value;
+        const joiningDate = document.getElementById('joiningDate').value;
+        const salary = document.getElementById('salary').value;
+        const email = document.getElementById('email').value;
+
+        const employeeData = { id, name, department, joiningDate, salary, email };
+
+        if (document.getElementById('form-title').innerText === 'Add Employee') {
+          // Add new employee
+          fetch('/api/employees', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(employeeData)
+          }).then(() => {
+            employees.push(employeeData);
+            displayEmployees();
+            document.getElementById('form-container').style.display = 'none';
+          });
+        } else {
+          // Update existing employee
+          fetch(`/api/employees/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(employeeData)
+          }).then(() => {
+            const index = employees.findIndex(emp => emp.id === id);
+            employees[index] = employeeData;
+            displayEmployees();
+            document.getElementById('form-container').style.display = 'none';
+          });
+        }
+      });
+
+      // Filter employees by department
+      document.getElementById('departmentFilter').addEventListener('change', displayEmployees);
+
+      // Load employees initially
+      loadEmployees();
+    </script>
+
+
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Employee Management</p>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Embloyee</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/man_emp.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="#">Our Employees</a>
+            <a href="manage_employees.html">Manage Employees</a>
+        </nav>
+    </header>
+    <main>
+
+
+
+
+        <!-- Filter by Department -->
+        <label for="departmentFilter">Filter by Department:</label>
+        <select id="departmentFilter">
+            <option value="">All</option>
+            <option value="HR">HR</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Sales">Sales</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+        </select>
+        <br><br>
+
+        <!--Table to display employee-->
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>Employee Id</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Joining Date</th>
+                    <th>Salary</th>
+                    <th>Email</th>
+
+                </tr>
+            </thead>
+        </table>
+
+        <script src="js/script.js"></script>
+
+    </main>
+    <footer>
+        <p>&copy; 2024 Employee Management</p>
+    </footer>
+</body>
+
+</html>
